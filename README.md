@@ -1,10 +1,19 @@
 # todoify
 
+# todo
+* should we add roles to different users - read, write, etc.
+* should we add docker to the stack
+* do we need slnx file?
+* is the directory structure good? .NET likes TitleCase
+* is the .net project name ok? Api?
+* We keep a placeholder JWT key in appsettings.json; a real demo key is stored in appsettings.Development.json (git‑ignored) for easy local setup.
+
 ## Setup & Running
 (two commands to get each running — make it foolproof)
 
 ## Architecture Decisions
-- Why EF Core in-memory vs SQLite (you chose X because Y)
+- Why I chose SQLLite over EF Core because it will make the upgrade easier when moving to a more robust db engine
+- used DateOnly instead of DateTime for the due date column. b/c this way we dont get caught in weird edge case around midnight
 - Why Repository pattern even over a simple ORM
 - Why React Query for state management
 
