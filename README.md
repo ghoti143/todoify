@@ -4,6 +4,8 @@
 * should we add roles to different users - read, write, etc.
 * should we add docker to the stack
 * do we need slnx file?
+* test error handling in api
+* unit tests and integration tests
 * is the directory structure good? .NET likes TitleCase
 * is the .net project name ok? Api?
 * We keep a placeholder JWT key in appsettings.json; a real demo key is stored in appsettings.Development.json (git‑ignored) for easy local setup.
