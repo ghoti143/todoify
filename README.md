@@ -9,6 +9,7 @@
 * is the directory structure good? .NET likes TitleCase
 * is the .net project name ok? Api?
 * We keep a placeholder JWT key in appsettings.json; a real demo key is stored in appsettings.Development.json (git‑ignored) for easy local setup.
+* enable light/dark mode
 
 ## Setup & Running
 (two commands to get each running — make it foolproof)
