@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
-using Api.Models;
+using Todoify.Api.Models;
 
-namespace Api.Data;
+namespace Todoify.Api.Data;
 
 public static class DbSeeder
 {

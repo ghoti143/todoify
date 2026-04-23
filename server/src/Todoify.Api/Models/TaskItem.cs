@@ -1,4 +1,4 @@
-namespace Api.Models;
+namespace Todoify.Api.Models;
 
 public class TaskItem
 {

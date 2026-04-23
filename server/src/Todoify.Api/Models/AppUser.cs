@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace Api.Models;
+namespace Todoify.Api.Models;
 
 public class AppUser : IdentityUser
 {

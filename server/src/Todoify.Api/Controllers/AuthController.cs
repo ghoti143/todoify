@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using Api.DTOs.Auth;
-using Api.Services;
+using Todoify.Api.DTOs.Auth;
+using Todoify.Api.Services;
 
-namespace Api.Controllers;
+namespace Todoify.Api.Controllers;
 
 [ApiController]
 [Route("api/auth")]
@@ -11,11 +11,11 @@ public class AuthController(IAuthService authService) : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterRequest request)
     {
-        var result = await authService.RegisterAsync(request);
-        if (result is null)
-            return BadRequest(new { message = "Email already in use." });
+        var (response, errors) = await authService.RegisterAsync(request);
+        if (response is null)
+            return BadRequest(new { errors });
 
-        return Ok(result);
+        return Ok(response);
     }
 
     [HttpPost("login")]

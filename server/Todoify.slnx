@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="src\Todoify.Api\Todoify.Api.csproj" />
+  <Project Path="tests\Todoify.Api.UnitTests\Todoify.Api.UnitTests.csproj" />
+  <Project Path="tests\Todoify.Api.IntegrationTests\Todoify.Api.IntegrationTests.csproj" />
+</Solution>

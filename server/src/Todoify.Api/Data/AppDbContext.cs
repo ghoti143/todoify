@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Api.Models;
+using Todoify.Api.Models;
 
-namespace Api.Data;
+namespace Todoify.Api.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options)
     : IdentityDbContext<AppUser>(options)

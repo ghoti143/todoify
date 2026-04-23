@@ -4,10 +4,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
-using Api.Data;
-using Api.Models;
-using Api.Services;
-using Api.Middleware;
+using Todoify.Api.Data;
+using Todoify.Api.Models;
+using Todoify.Api.Services;
+using Todoify.Api.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 

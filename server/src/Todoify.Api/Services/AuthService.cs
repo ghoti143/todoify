@@ -3,14 +3,14 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using Api.DTOs.Auth;
-using Api.Models;
+using Todoify.Api.DTOs.Auth;
+using Todoify.Api.Models;
 
-namespace Api.Services;
+namespace Todoify.Api.Services;
 
 public interface IAuthService
 {
-    Task<AuthResponse?> RegisterAsync(RegisterRequest request);
+    Task<(AuthResponse?, IEnumerable<string> Errors)> RegisterAsync(RegisterRequest request);
     Task<AuthResponse?> LoginAsync(LoginRequest request);
 }
 
@@ -18,8 +18,12 @@ public class AuthService(
     UserManager<AppUser> userManager,
     IConfiguration config) : IAuthService
 {
-    public async Task<AuthResponse?> RegisterAsync(RegisterRequest request)
+    public async Task<(AuthResponse?, IEnumerable<string> Errors)> RegisterAsync(RegisterRequest request)
     {
+        // Check for existing user before attempting create
+        if (await userManager.FindByEmailAsync(request.Email) is not null)
+            return (null, ["Email is already in use"]);
+
         var user = new AppUser
         {
             Email = request.Email,
@@ -28,9 +32,10 @@ public class AuthService(
         };
 
         var result = await userManager.CreateAsync(user, request.Password);
-        if (!result.Succeeded) return null;
+        if (!result.Succeeded)
+            return (null, result.Errors.Select(e => e.Description));
 
-        return GenerateToken(user);
+        return (GenerateToken(user), []);
     }
 
     public async Task<AuthResponse?> LoginAsync(LoginRequest request)
