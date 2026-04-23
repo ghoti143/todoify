@@ -4,284 +4,284 @@ using Todoify.Api.Models;
 using Todoify.Api.Services;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Xunit;
 
-namespace Todoify.Api.UnitTests.Services;
-
-/// <summary>
-/// Uses EF Core InMemory provider so no mocking of DbContext is needed.
-/// Each test gets a fresh, uniquely-named database.
-/// </summary>
-public class TaskServiceTests : IDisposable
+namespace Todoify.Api.UnitTests.Services
 {
-    private readonly AppDbContext _db;
-    private readonly TaskService _sut;
-    private const string UserId = "user-001";
-    private const string OtherUserId = "user-002";
-
-    public TaskServiceTests()
+    /// <summary>
+    /// Uses EF Core InMemory provider so no mocking of DbContext is needed.
+    /// Each test gets a fresh, uniquely-named database.
+    /// </summary>
+    public class TaskServiceTests : IDisposable
     {
-        var opts = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-        _db = new AppDbContext(opts);
-        _sut = new TaskService(_db);
-    }
+        private readonly AppDbContext _db;
+        private readonly TaskService _sut;
+        private const string UserId = "user-001";
+        private const string OtherUserId = "user-002";
 
-    public void Dispose() => _db.Dispose();
-
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    private TaskItem AddTask(string title = "Test Task", string userId = UserId,
-        bool isComplete = false, Priority priority = Priority.Medium)
-    {
-        var task = new TaskItem
+        public TaskServiceTests()
         {
-            Title = title,
-            UserId = userId,
-            IsComplete = isComplete,
-            Priority = priority
-        };
-        _db.Tasks.Add(task);
-        _db.SaveChanges();
-        return task;
-    }
+            DbContextOptions<AppDbContext> opts = new DbContextOptionsBuilder<AppDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+            _db = new AppDbContext(opts);
+            _sut = new TaskService(_db);
+        }
 
-    // -------------------------------------------------------------------------
-    // GetAllAsync
-    // -------------------------------------------------------------------------
+        public void Dispose() => _db.Dispose();
 
-    [Fact]
-    public async Task GetAllAsync_ReturnsOnlyCurrentUsersTasks()
-    {
-        AddTask("Mine", UserId);
-        AddTask("Theirs", OtherUserId);
+        // -------------------------------------------------------------------------
+        // Helpers
+        // -------------------------------------------------------------------------
 
-        var result = await _sut.GetAllAsync(UserId, null, null, null);
+        private TaskItem AddTask(string title = "Test Task", string userId = UserId,
+            bool isComplete = false, Priority priority = Priority.Medium)
+        {
+            var task = new TaskItem
+            {
+                Title = title,
+                UserId = userId,
+                IsComplete = isComplete,
+                Priority = priority
+            };
+            _ = _db.Tasks.Add(task);
+            _ = _db.SaveChanges();
+            return task;
+        }
 
-        result.Should().HaveCount(1);
-        result[0].Title.Should().Be("Mine");
-    }
+        // -------------------------------------------------------------------------
+        // GetAllAsync
+        // -------------------------------------------------------------------------
 
-    [Fact]
-    public async Task GetAllAsync_FilterByIsComplete_ReturnsMatchingTasks()
-    {
-        AddTask("Done", isComplete: true);
-        AddTask("Pending", isComplete: false);
+        [Fact]
+        public async Task GetAllAsync_ReturnsOnlyCurrentUsersTasks()
+        {
+            _ = AddTask("Mine", UserId);
+            _ = AddTask("Theirs", OtherUserId);
 
-        var result = await _sut.GetAllAsync(UserId, isComplete: true, null, null);
+            List<TaskResponse> result = await _sut.GetAllAsync(UserId, null, null, null);
 
-        result.Should().HaveCount(1);
-        result[0].Title.Should().Be("Done");
-    }
+            _ = result.Should().HaveCount(1);
+            _ = result[0].Title.Should().Be("Mine");
+        }
 
-    [Fact]
-    public async Task GetAllAsync_FilterByPriority_ReturnsMatchingTasks()
-    {
-        AddTask("High priority task", priority: Priority.High);
-        AddTask("Low priority task", priority: Priority.Low);
+        [Fact]
+        public async Task GetAllAsync_FilterByIsComplete_ReturnsMatchingTasks()
+        {
+            _ = AddTask("Done", isComplete: true);
+            _ = AddTask("Pending", isComplete: false);
 
-        var result = await _sut.GetAllAsync(UserId, null, Priority.High, null);
+            List<TaskResponse> result = await _sut.GetAllAsync(UserId, isComplete: true, null, null);
 
-        result.Should().HaveCount(1);
-        result[0].Title.Should().Be("High priority task");
-    }
+            _ = result.Should().HaveCount(1);
+            _ = result[0].Title.Should().Be("Done");
+        }
 
-    [Theory]
-    [InlineData("title")]
-    [InlineData("priority")]
-    [InlineData("duedate")]
-    [InlineData("unknown")]
-    [InlineData(null)]
-    public async Task GetAllAsync_SortBy_DoesNotThrow(string? sortBy)
-    {
-        AddTask("A"); AddTask("B");
+        [Fact]
+        public async Task GetAllAsync_FilterByPriority_ReturnsMatchingTasks()
+        {
+            _ = AddTask("High priority task", priority: Priority.High);
+            _ = AddTask("Low priority task", priority: Priority.Low);
 
-        var act = () => _sut.GetAllAsync(UserId, null, null, sortBy);
+            List<TaskResponse> result = await _sut.GetAllAsync(UserId, null, Priority.High, null);
 
-        await act.Should().NotThrowAsync();
-    }
+            _ = result.Should().HaveCount(1);
+            _ = result[0].Title.Should().Be("High priority task");
+        }
 
-    [Fact]
-    public async Task GetAllAsync_SortByTitle_ReturnsTitlesAscending()
-    {
-        AddTask("Zebra"); AddTask("Apple"); AddTask("Mango");
+        [Theory]
+        [InlineData("title")]
+        [InlineData("priority")]
+        [InlineData("duedate")]
+        [InlineData("unknown")]
+        [InlineData(null)]
+        public async Task GetAllAsync_SortBy_DoesNotThrow(string? sortBy)
+        {
+            _ = AddTask("A"); _ = AddTask("B");
 
-        var result = await _sut.GetAllAsync(UserId, null, null, "title");
+            Func<Task<List<TaskResponse>>> act = () => _sut.GetAllAsync(UserId, null, null, sortBy);
 
-        result.Select(t => t.Title).Should().BeInAscendingOrder();
-    }
+            _ = await act.Should().NotThrowAsync();
+        }
 
-    // -------------------------------------------------------------------------
-    // GetByIdAsync
-    // -------------------------------------------------------------------------
+        [Fact]
+        public async Task GetAllAsync_SortByTitle_ReturnsTitlesAscending()
+        {
+            _ = AddTask("Zebra"); _ = AddTask("Apple"); _ = AddTask("Mango");
 
-    [Fact]
-    public async Task GetByIdAsync_ExistingTask_ReturnsTaskResponse()
-    {
-        var task = AddTask();
+            List<TaskResponse> result = await _sut.GetAllAsync(UserId, null, null, "title");
 
-        var result = await _sut.GetByIdAsync(task.Id, UserId);
+            _ = result.Select(t => t.Title).Should().BeInAscendingOrder();
+        }
 
-        result.Should().NotBeNull();
-        result!.Id.Should().Be(task.Id);
-        result.Title.Should().Be(task.Title);
-    }
+        // -------------------------------------------------------------------------
+        // GetByIdAsync
+        // -------------------------------------------------------------------------
 
-    [Fact]
-    public async Task GetByIdAsync_WrongUser_ReturnsNull()
-    {
-        var task = AddTask(userId: OtherUserId);
+        [Fact]
+        public async Task GetByIdAsync_ExistingTask_ReturnsTaskResponse()
+        {
+            TaskItem task = AddTask();
 
-        var result = await _sut.GetByIdAsync(task.Id, UserId);
+            TaskResponse? result = await _sut.GetByIdAsync(task.Id, UserId);
 
-        result.Should().BeNull();
-    }
+            _ = result.Should().NotBeNull();
+            _ = result.Id.Should().Be(task.Id);
+            _ = result.Title.Should().Be(task.Title);
+        }
 
-    [Fact]
-    public async Task GetByIdAsync_NonExistentId_ReturnsNull()
-    {
-        var result = await _sut.GetByIdAsync(Guid.NewGuid(), UserId);
+        [Fact]
+        public async Task GetByIdAsync_WrongUser_ReturnsNull()
+        {
+            TaskItem task = AddTask(userId: OtherUserId);
 
-        result.Should().BeNull();
-    }
+            TaskResponse? result = await _sut.GetByIdAsync(task.Id, UserId);
 
-    // -------------------------------------------------------------------------
-    // CreateAsync
-    // -------------------------------------------------------------------------
+            _ = result.Should().BeNull();
+        }
 
-    [Fact]
-    public async Task CreateAsync_ValidRequest_PersistsAndReturnsTask()
-    {
-        var request = new CreateTaskRequest(
-            "New Task", "A description", Priority.High,
-            DateOnly.FromDateTime(DateTime.Today.AddDays(7)));
+        [Fact]
+        public async Task GetByIdAsync_NonExistentId_ReturnsNull()
+        {
+            TaskResponse? result = await _sut.GetByIdAsync(Guid.NewGuid(), UserId);
 
-        var result = await _sut.CreateAsync(request, UserId);
+            _ = result.Should().BeNull();
+        }
 
-        result.Id.Should().NotBeEmpty();
-        result.Title.Should().Be("New Task");
-        result.Priority.Should().Be(Priority.High);
-        result.IsComplete.Should().BeFalse();
+        // -------------------------------------------------------------------------
+        // CreateAsync
+        // -------------------------------------------------------------------------
 
-        _db.Tasks.Should().HaveCount(1);
-    }
+        [Fact]
+        public async Task CreateAsync_ValidRequest_PersistsAndReturnsTask()
+        {
+            var request = new CreateTaskRequest(
+                "New Task", "A description", Priority.High,
+                DateOnly.FromDateTime(DateTime.Today.AddDays(7)));
 
-    [Fact]
-    public async Task CreateAsync_SetsUserIdFromParameter_NotFromRequest()
-    {
-        var request = new CreateTaskRequest("Task", null, Priority.Low, null);
+            TaskResponse result = await _sut.CreateAsync(request, UserId);
 
-        await _sut.CreateAsync(request, UserId);
+            _ = result.Id.Should().NotBeEmpty();
+            _ = result.Title.Should().Be("New Task");
+            _ = result.Priority.Should().Be(Priority.High);
+            _ = result.IsComplete.Should().BeFalse();
 
-        _db.Tasks.Single().UserId.Should().Be(UserId);
-    }
+            _ = _db.Tasks.Should().HaveCount(1);
+        }
 
-    // -------------------------------------------------------------------------
-    // UpdateAsync
-    // -------------------------------------------------------------------------
+        [Fact]
+        public async Task CreateAsync_SetsUserIdFromParameter_NotFromRequest()
+        {
+            var request = new CreateTaskRequest("Task", null, Priority.Low, null);
 
-    [Fact]
-    public async Task UpdateAsync_ExistingTask_UpdatesAndReturnsResponse()
-    {
-        var task = AddTask("Old Title");
-        var request = new UpdateTaskRequest("New Title", "Desc", Priority.High, null);
+            _ = await _sut.CreateAsync(request, UserId);
 
-        var result = await _sut.UpdateAsync(task.Id, request, UserId);
+            _ = _db.Tasks.Single().UserId.Should().Be(UserId);
+        }
 
-        result.Should().NotBeNull();
-        result!.Title.Should().Be("New Title");
-        result.Priority.Should().Be(Priority.High);
-    }
+        // -------------------------------------------------------------------------
+        // UpdateAsync
+        // -------------------------------------------------------------------------
 
-    [Fact]
-    public async Task UpdateAsync_SetsUpdatedAt()
-    {
-        var task = AddTask();
-        var before = DateTime.UtcNow;
-        var request = new UpdateTaskRequest("X", null, Priority.Low, null);
+        [Fact]
+        public async Task UpdateAsync_ExistingTask_UpdatesAndReturnsResponse()
+        {
+            TaskItem task = AddTask("Old Title");
+            var request = new UpdateTaskRequest("New Title", "Desc", Priority.High, null);
 
-        var result = await _sut.UpdateAsync(task.Id, request, UserId);
+            TaskResponse? result = await _sut.UpdateAsync(task.Id, request, UserId);
 
-        result!.UpdatedAt.Should().BeOnOrAfter(before);
-    }
+            _ = result.Should().NotBeNull();
+            _ = result.Title.Should().Be("New Title");
+            _ = result.Priority.Should().Be(Priority.High);
+        }
 
-    [Fact]
-    public async Task UpdateAsync_WrongUser_ReturnsNull()
-    {
-        var task = AddTask(userId: OtherUserId);
-        var request = new UpdateTaskRequest("Hacked", null, Priority.Low, null);
+        [Fact]
+        public async Task UpdateAsync_SetsUpdatedAt()
+        {
+            TaskItem task = AddTask();
+            DateTime before = DateTime.UtcNow;
+            var request = new UpdateTaskRequest("X", null, Priority.Low, null);
 
-        var result = await _sut.UpdateAsync(task.Id, request, UserId);
+            TaskResponse? result = await _sut.UpdateAsync(task.Id, request, UserId);
 
-        result.Should().BeNull();
-    }
+            _ = result!.UpdatedAt.Should().BeOnOrAfter(before);
+        }
 
-    // -------------------------------------------------------------------------
-    // ToggleCompleteAsync
-    // -------------------------------------------------------------------------
+        [Fact]
+        public async Task UpdateAsync_WrongUser_ReturnsNull()
+        {
+            TaskItem task = AddTask(userId: OtherUserId);
+            var request = new UpdateTaskRequest("Hacked", null, Priority.Low, null);
 
-    [Fact]
-    public async Task ToggleCompleteAsync_IncompleteTask_MarksComplete()
-    {
-        var task = AddTask(isComplete: false);
+            TaskResponse? result = await _sut.UpdateAsync(task.Id, request, UserId);
 
-        var result = await _sut.ToggleCompleteAsync(task.Id, UserId);
+            _ = result.Should().BeNull();
+        }
 
-        result!.IsComplete.Should().BeTrue();
-    }
+        // -------------------------------------------------------------------------
+        // ToggleCompleteAsync
+        // -------------------------------------------------------------------------
 
-    [Fact]
-    public async Task ToggleCompleteAsync_CompleteTask_MarksIncomplete()
-    {
-        var task = AddTask(isComplete: true);
+        [Fact]
+        public async Task ToggleCompleteAsync_IncompleteTask_MarksComplete()
+        {
+            TaskItem task = AddTask(isComplete: false);
 
-        var result = await _sut.ToggleCompleteAsync(task.Id, UserId);
+            TaskResponse? result = await _sut.ToggleCompleteAsync(task.Id, UserId);
 
-        result!.IsComplete.Should().BeFalse();
-    }
+            _ = result!.IsComplete.Should().BeTrue();
+        }
 
-    [Fact]
-    public async Task ToggleCompleteAsync_NonExistentTask_ReturnsNull()
-    {
-        var result = await _sut.ToggleCompleteAsync(Guid.NewGuid(), UserId);
+        [Fact]
+        public async Task ToggleCompleteAsync_CompleteTask_MarksIncomplete()
+        {
+            TaskItem task = AddTask(isComplete: true);
 
-        result.Should().BeNull();
-    }
+            TaskResponse? result = await _sut.ToggleCompleteAsync(task.Id, UserId);
 
-    // -------------------------------------------------------------------------
-    // DeleteAsync
-    // -------------------------------------------------------------------------
+            _ = result!.IsComplete.Should().BeFalse();
+        }
 
-    [Fact]
-    public async Task DeleteAsync_ExistingTask_DeletesAndReturnsTrue()
-    {
-        var task = AddTask();
+        [Fact]
+        public async Task ToggleCompleteAsync_NonExistentTask_ReturnsNull()
+        {
+            TaskResponse? result = await _sut.ToggleCompleteAsync(Guid.NewGuid(), UserId);
 
-        var result = await _sut.DeleteAsync(task.Id, UserId);
+            _ = result.Should().BeNull();
+        }
 
-        result.Should().BeTrue();
-        _db.Tasks.Should().BeEmpty();
-    }
+        // -------------------------------------------------------------------------
+        // DeleteAsync
+        // -------------------------------------------------------------------------
 
-    [Fact]
-    public async Task DeleteAsync_WrongUser_ReturnsFalseAndDoesNotDelete()
-    {
-        var task = AddTask(userId: OtherUserId);
+        [Fact]
+        public async Task DeleteAsync_ExistingTask_DeletesAndReturnsTrue()
+        {
+            TaskItem task = AddTask();
 
-        var result = await _sut.DeleteAsync(task.Id, UserId);
+            bool result = await _sut.DeleteAsync(task.Id, UserId);
 
-        result.Should().BeFalse();
-        _db.Tasks.Should().HaveCount(1);
-    }
+            _ = result.Should().BeTrue();
+            _ = _db.Tasks.Should().BeEmpty();
+        }
 
-    [Fact]
-    public async Task DeleteAsync_NonExistentId_ReturnsFalse()
-    {
-        var result = await _sut.DeleteAsync(Guid.NewGuid(), UserId);
+        [Fact]
+        public async Task DeleteAsync_WrongUser_ReturnsFalseAndDoesNotDelete()
+        {
+            TaskItem task = AddTask(userId: OtherUserId);
 
-        result.Should().BeFalse();
+            bool result = await _sut.DeleteAsync(task.Id, UserId);
+
+            _ = result.Should().BeFalse();
+            _ = _db.Tasks.Should().HaveCount(1);
+        }
+
+        [Fact]
+        public async Task DeleteAsync_NonExistentId_ReturnsFalse()
+        {
+            bool result = await _sut.DeleteAsync(Guid.NewGuid(), UserId);
+
+            _ = result.Should().BeFalse();
+        }
     }
 }

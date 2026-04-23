@@ -1,214 +1,215 @@
 using FluentAssertions;
+using FluentValidation.Results;
 using Todoify.Api.DTOs.Tasks;
 using Todoify.Api.Models;
-using Xunit;
 
-namespace Todoify.Api.Tests.DTOs.Tasks;
-
-public class TaskValidatorTests
+namespace Todoify.Api.UnitTests.DTOs.Tasks
 {
-    // -------------------------------------------------------------------------
-    // CreateTaskRequestValidator
-    // -------------------------------------------------------------------------
-
-    private readonly CreateTaskRequestValidator _createValidator = new();
-
-    [Fact]
-    public void Create_WithValidRequest_ShouldPass()
+    public class TaskValidatorTests
     {
-        var request = new CreateTaskRequest(
-            Title: "Buy groceries",
-            Description: "Milk and eggs",
-            Priority: Priority.Medium,
-            DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1))
-        );
+        // -------------------------------------------------------------------------
+        // CreateTaskRequestValidator
+        // -------------------------------------------------------------------------
 
-        var result = _createValidator.Validate(request);
+        private readonly CreateTaskRequestValidator _createValidator = new();
 
-        result.IsValid.Should().BeTrue();
-    }
+        [Fact]
+        public void Create_WithValidRequest_ShouldPass()
+        {
+            var request = new CreateTaskRequest(
+                    Title: "Buy groceries",
+                    Description: "Milk and eggs",
+                Priority: Priority.Medium,
+                DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1))
+            );
 
-    [Fact]
-    public void Create_WithEmptyTitle_ShouldFail()
-    {
-        var request = new CreateTaskRequest("", null, Priority.Low, null);
+            ValidationResult result = _createValidator.Validate(request);
 
-        var result = _createValidator.Validate(request);
+            _ = result.IsValid.Should().BeTrue();
+        }
 
-        result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.ErrorMessage == "Title is required.");
-    }
+        [Fact]
+        public void Create_WithEmptyTitle_ShouldFail()
+        {
+            var request = new CreateTaskRequest("", null, Priority.Low, null);
 
-    [Fact]
-    public void Create_WithTitleExceeding200Chars_ShouldFail()
-    {
-        var request = new CreateTaskRequest(
-            Title: new string('a', 201),
-            Description: null,
-            Priority: Priority.Low,
-            DueDate: null
-        );
+            ValidationResult result = _createValidator.Validate(request);
 
-        var result = _createValidator.Validate(request);
+            _ = result.IsValid.Should().BeFalse();
+            _ = result.Errors.Should().Contain(e => e.ErrorMessage == "Title is required.");
+        }
 
-        result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.ErrorMessage == "Title must be 200 characters or fewer.");
-    }
+        [Fact]
+        public void Create_WithTitleExceeding200Chars_ShouldFail()
+        {
+            var request = new CreateTaskRequest(
+                Title: new string('a', 201),
+                Description: null,
+                Priority: Priority.Low,
+                DueDate: null
+            );
 
-    [Fact]
-    public void Create_WithDescriptionExceeding2000Chars_ShouldFail()
-    {
-        var request = new CreateTaskRequest(
-            Title: "Valid title",
-            Description: new string('a', 2001),
-            Priority: Priority.Low,
-            DueDate: null
-        );
+            ValidationResult result = _createValidator.Validate(request);
 
-        var result = _createValidator.Validate(request);
+            _ = result.IsValid.Should().BeFalse();
+            _ = result.Errors.Should().Contain(e => e.ErrorMessage == "Title must be 200 characters or fewer.");
+        }
 
-        result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.ErrorMessage == "Description must be 2000 characters or fewer.");
-    }
+        [Fact]
+        public void Create_WithDescriptionExceeding2000Chars_ShouldFail()
+        {
+            var request = new CreateTaskRequest(
+                Title: "Valid title",
+                Description: new string('a', 2001),
+                Priority: Priority.Low,
+                DueDate: null
+            );
 
-    [Fact]
-    public void Create_WithNullDescription_ShouldPass()
-    {
-        var request = new CreateTaskRequest("Valid title", null, Priority.Low, null);
+            ValidationResult result = _createValidator.Validate(request);
 
-        var result = _createValidator.Validate(request);
+            _ = result.IsValid.Should().BeFalse();
+            _ = result.Errors.Should().Contain(e => e.ErrorMessage == "Description must be 2000 characters or fewer.");
+        }
 
-        result.IsValid.Should().BeTrue();
-    }
+        [Fact]
+        public void Create_WithNullDescription_ShouldPass()
+        {
+            var request = new CreateTaskRequest("Valid title", null, Priority.Low, null);
 
-    [Fact]
-    public void Create_WithPastDueDate_ShouldFail()
-    {
-        var request = new CreateTaskRequest(
-            Title: "Valid title",
-            Description: null,
-            Priority: Priority.Low,
-            DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(-1))
-        );
+            ValidationResult result = _createValidator.Validate(request);
 
-        var result = _createValidator.Validate(request);
+            _ = result.IsValid.Should().BeTrue();
+        }
 
-        result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.ErrorMessage == "Due date must be today or in the future.");
-    }
+        [Fact]
+        public void Create_WithPastDueDate_ShouldFail()
+        {
+            var request = new CreateTaskRequest(
+                Title: "Valid title",
+                Description: null,
+                Priority: Priority.Low,
+                DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(-1))
+            );
 
-    [Fact]
-    public void Create_WithTodayAsDueDate_ShouldPass()
-    {
-        var request = new CreateTaskRequest(
-            Title: "Valid title",
-            Description: null,
-            Priority: Priority.Low,
-            DueDate: DateOnly.FromDateTime(DateTime.Today)
-        );
+            ValidationResult result = _createValidator.Validate(request);
 
-        var result = _createValidator.Validate(request);
+            _ = result.IsValid.Should().BeFalse();
+            _ = result.Errors.Should().Contain(e => e.ErrorMessage == "Due date must be today or in the future.");
+        }
 
-        result.IsValid.Should().BeTrue();
-    }
+        [Fact]
+        public void Create_WithTodayAsDueDate_ShouldPass()
+        {
+            var request = new CreateTaskRequest(
+                Title: "Valid title",
+                Description: null,
+                Priority: Priority.Low,
+                DueDate: DateOnly.FromDateTime(DateTime.Today)
+            );
 
-    [Fact]
-    public void Create_WithNullDueDate_ShouldPass()
-    {
-        var request = new CreateTaskRequest("Valid title", null, Priority.Low, null);
+            ValidationResult result = _createValidator.Validate(request);
 
-        var result = _createValidator.Validate(request);
+            _ = result.IsValid.Should().BeTrue();
+        }
 
-        result.IsValid.Should().BeTrue();
-    }
+        [Fact]
+        public void Create_WithNullDueDate_ShouldPass()
+        {
+            var request = new CreateTaskRequest("Valid title", null, Priority.Low, null);
 
-    // -------------------------------------------------------------------------
-    // UpdateTaskRequestValidator
-    // -------------------------------------------------------------------------
+            ValidationResult result = _createValidator.Validate(request);
 
-    private readonly UpdateTaskRequestValidator _updateValidator = new();
+            _ = result.IsValid.Should().BeTrue();
+        }
 
-    [Fact]
-    public void Update_WithValidRequest_ShouldPass()
-    {
-        var request = new UpdateTaskRequest(
-            Title: "Updated title",
-            Description: "Updated description",
-            Priority: Priority.High,
-            DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1))
-        );
+        // -------------------------------------------------------------------------
+        // UpdateTaskRequestValidator
+        // -------------------------------------------------------------------------
 
-        var result = _updateValidator.Validate(request);
+        private readonly UpdateTaskRequestValidator _updateValidator = new();
 
-        result.IsValid.Should().BeTrue();
-    }
+        [Fact]
+        public void Update_WithValidRequest_ShouldPass()
+        {
+            var request = new UpdateTaskRequest(
+                Title: "Updated title",
+                Description: "Updated description",
+                Priority: Priority.High,
+                DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(1))
+            );
 
-    [Fact]
-    public void Update_WithEmptyTitle_ShouldFail()
-    {
-        var request = new UpdateTaskRequest("", null, Priority.Low, null);
+            ValidationResult result = _updateValidator.Validate(request);
 
-        var result = _updateValidator.Validate(request);
+            _ = result.IsValid.Should().BeTrue();
+        }
 
-        result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.ErrorMessage == "Title is required.");
-    }
+        [Fact]
+        public void Update_WithEmptyTitle_ShouldFail()
+        {
+            var request = new UpdateTaskRequest("", null, Priority.Low, null);
 
-    [Fact]
-    public void Update_WithTitleExceeding200Chars_ShouldFail()
-    {
-        var request = new UpdateTaskRequest(
-            Title: new string('a', 201),
-            Description: null,
-            Priority: Priority.Low,
-            DueDate: null
-        );
+            ValidationResult result = _updateValidator.Validate(request);
 
-        var result = _updateValidator.Validate(request);
+            _ = result.IsValid.Should().BeFalse();
+            _ = result.Errors.Should().Contain(e => e.ErrorMessage == "Title is required.");
+        }
 
-        result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.ErrorMessage == "Title must be 200 characters or fewer.");
-    }
+        [Fact]
+        public void Update_WithTitleExceeding200Chars_ShouldFail()
+        {
+            var request = new UpdateTaskRequest(
+                Title: new string('a', 201),
+                Description: null,
+                Priority: Priority.Low,
+                DueDate: null
+            );
 
-    [Fact]
-    public void Update_WithDescriptionExceeding2000Chars_ShouldFail()
-    {
-        var request = new UpdateTaskRequest(
-            Title: "Valid title",
-            Description: new string('a', 2001),
-            Priority: Priority.Low,
-            DueDate: null
-        );
+            ValidationResult result = _updateValidator.Validate(request);
 
-        var result = _updateValidator.Validate(request);
+            _ = result.IsValid.Should().BeFalse();
+            _ = result.Errors.Should().Contain(e => e.ErrorMessage == "Title must be 200 characters or fewer.");
+        }
 
-        result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.ErrorMessage == "Description must be 2000 characters or fewer.");
-    }
+        [Fact]
+        public void Update_WithDescriptionExceeding2000Chars_ShouldFail()
+        {
+            var request = new UpdateTaskRequest(
+                Title: "Valid title",
+                Description: new string('a', 2001),
+                Priority: Priority.Low,
+                DueDate: null
+            );
 
-    [Fact]
-    public void Update_WithPastDueDate_ShouldFail()
-    {
-        var request = new UpdateTaskRequest(
-            Title: "Valid title",
-            Description: null,
-            Priority: Priority.Low,
-            DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(-1))
-        );
+            ValidationResult result = _updateValidator.Validate(request);
 
-        var result = _updateValidator.Validate(request);
+            _ = result.IsValid.Should().BeFalse();
+            _ = result.Errors.Should().Contain(e => e.ErrorMessage == "Description must be 2000 characters or fewer.");
+        }
 
-        result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.ErrorMessage == "Due date must be today or in the future.");
-    }
+        [Fact]
+        public void Update_WithPastDueDate_ShouldFail()
+        {
+            var request = new UpdateTaskRequest(
+                Title: "Valid title",
+                Description: null,
+                Priority: Priority.Low,
+                DueDate: DateOnly.FromDateTime(DateTime.Today.AddDays(-1))
+            );
 
-    [Fact]
-    public void Update_WithNullDueDate_ShouldPass()
-    {
-        var request = new UpdateTaskRequest("Valid title", null, Priority.Low, null);
+            ValidationResult result = _updateValidator.Validate(request);
 
-        var result = _updateValidator.Validate(request);
+            _ = result.IsValid.Should().BeFalse();
+            _ = result.Errors.Should().Contain(e => e.ErrorMessage == "Due date must be today or in the future.");
+        }
 
-        result.IsValid.Should().BeTrue();
+        [Fact]
+        public void Update_WithNullDueDate_ShouldPass()
+        {
+            var request = new UpdateTaskRequest("Valid title", null, Priority.Low, null);
+
+            ValidationResult result = _updateValidator.Validate(request);
+
+            _ = result.IsValid.Should().BeTrue();
+        }
     }
 }
