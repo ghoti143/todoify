@@ -12,5 +12,10 @@ export default defineConfig(({ mode }) => {
         "/api": env.API_URL || "http://localhost:5231",
       },
     },
+    test: {
+      environment: "jsdom",
+      globals: true,
+      setupFiles: "./src/test/setup.ts",
+    },
   };
 });

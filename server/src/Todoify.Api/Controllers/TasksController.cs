@@ -1,6 +1,6 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using Todoify.Api.DTOs.Tasks;
 using Todoify.Api.Models;
 using Todoify.Api.Services;

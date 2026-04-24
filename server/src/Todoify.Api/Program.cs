@@ -1,3 +1,5 @@
+using System.Reflection;
+using System.Text;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -5,12 +7,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
-using System.Text;
 using Todoify.Api.Data;
 using Todoify.Api.Middleware;
 using Todoify.Api.Models;
 using Todoify.Api.Services;
-using System.Reflection;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
