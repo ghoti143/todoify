@@ -94,6 +94,7 @@ A full-stack task manager — .NET Web API backend, React frontend. Register, cr
 - Client-side form validation to avoid unnecessary round trips
 - URL-based routing for easy state sharing via copy/paste
 - Migrate JWT storage from local storage to `httpOnly` cookie
+- Keyboard shortcuts to create new task, mark task complete, etc.
 
 ### DX
 - GitHub Actions to run tests on pull request builds
