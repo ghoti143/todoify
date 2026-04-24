@@ -1,70 +1,94 @@
-# todoify
+# Todoify
 
-# todo
-* should we add roles to different users - read, write, etc.
-* should we add docker to the stack
-* do we need slnx file?
-* test error handling in api
-* unit tests and integration tests
-* is the directory structure good? .NET likes TitleCase
-* is the .net project name ok? Api?
-* We keep a placeholder JWT key in appsettings.json; a real demo key is stored in appsettings.Development.json (git‑ignored) for easy local setup.
-* enable light/dark mode
+A full-stack task manager — .NET Web API backend, React frontend. Register, create, and manage tasks with due dates, priorities, and descriptions.
 
-## Setup & Running
-(two commands to get each running — make it foolproof)
+`.NET Web API` • `React` • `TailwindCSS` • `Docker` • `OAuth2 / JWT`
 
-## Architecture Decisions
-- Why I chose SQLLite over EF Core because it will make the upgrade easier when moving to a more robust db engine
-- used DateOnly instead of DateTime for the due date column. b/c this way we dont get caught in weird edge case around midnight
-- Why Repository pattern even over a simple ORM
-- Why React Query for state management
+---
 
-## Assumptions
-- Auth is out of scope; in production would add JWT + ASP.NET Identity
-- Single user; multi-tenancy would require user IDs on tasks
-- In-memory DB resets on restart; production would use PostgreSQL/SQL Server
+## Quick start
 
-## What I'd Add for Production
-- Authentication & authorization
-- Pagination on the task list
-- Real database with migrations
-- Unit + integration tests (xUnit, bUnit for React)
-- CI/CD pipeline (GitHub Actions)
-- Rate limiting
-- Soft deletes instead of hard deletes
+1. **Clone the repo**
+   ```bash
+   git clone https://github.com/ghoti143/todoify.git
+   ```
 
-## Trade-offs
-- Chose in-memory EF over SQLite for simplicity — SQLite would be a one-line change in DI config
-- No tests in this submission due to time, but architecture is designed to be testable (DI, interfaces, no static state)
+2. **Spin up with Docker**
+   ```bash
+   cd todoify && npm run docker:up
+   ```
 
+3. **Open in browser**
+   http://localhost:8080
 
+4. **Log in with the demo account**
+   ```
+   demo@mytodoifyapp.com / demomytodoifyapp123
+   ```
 
+---
 
---------
+## Running locally
 
+### Prerequisites
+- `npm >= 10.8.2`
+- `node >= 20.19.6`
+- `dotnet/sdk >= 10.0.202`
 
+1. ```bash
+   npm install
+   ```
 
+2. ```bash
+   npm run setup
+   ```
 
+3. **Start client and server together**
+   ```bash
+   npm run dev
+   ```
 
+4. **App:** http://localhost:8080 · **Swagger:** http://localhost:8081/swagger
+   ```
+   demo@mytodoifyapp.com / demomytodoifyapp123
+   ```
 
-## Quick Start
+---
 
-`git clone https://github.com/ghoti143/todoify.git`
-`cd todoify && npm run docker:up`
-navigate to http://localhost:8080
-login with demo@mytodoifyapp.com / demomytodoifyapp123
+## Features
 
+### Server
+- DTOs with fluent validation + unit tests
+- OAuth2 authentication via Microsoft.IdentityModel
+- Integration tests for correct HTTP status codes
+- XML doc comments for enriched Swagger docs
 
+### DX
+- Docker for single-command local spin-up
+- Root npm scripts for install, dev, lint, and test
+- `.editorconfig` for consistent linting
 
-## run locally
+### Client
+- TailwindCSS for clean, utility-first styling
+- React Query for loading and error state management
+- `AuthProvider` stores JWT in local storage
+- Axios interceptors attach JWT to request headers
 
-### prerequisites
+---
 
-npm >= 10.8.2
-node >= 20.19.6
-dotnet/sdk >= 10.0.202
+## Future improvements
 
-`npm run dev` - this will fire up both the client and the server
+### Server
+- Multi-tenancy — allow users in the same org to share tasks
+- Move JWT signing key out of repo and into Azure Key Vault
+- Add refresh tokens
 
+### Client
+- Client-side form validation to avoid unnecessary round trips
+- URL-based routing for easy state sharing via copy/paste
+- Migrate JWT storage from local storage to `httpOnly` cookie
 
+### DX
+- GitHub Actions to run tests on pull request builds
+- GitHub Actions for automatic deploy on merge to main
+- Generate TypeScript types from C# DTOs
