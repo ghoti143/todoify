@@ -1,3 +1,4 @@
+![Favicon](client/public/favicon.ico)
 # Todoify
 
 A full-stack task manager — .NET Web API backend, React frontend. Register, create, and manage tasks with due dates, priorities, and descriptions.
