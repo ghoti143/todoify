@@ -1,4 +1,5 @@
 import { useState } from "react";
+import axios from "axios";
 import type { AuthResponse } from "../types";
 import { api } from "../api/client";
 import { AuthContext } from "./AuthContext";
@@ -11,13 +12,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   });
 
   const login = async (email: string, password: string) => {
-    const res = await api.post<AuthResponse>("/auth/login", {
-      email,
-      password,
-    });
-    localStorage.setItem("token", res.data.token);
-    localStorage.setItem("email", res.data.email);
-    setUser(res.data);
+    try {
+      const res = await api.post<AuthResponse>("/auth/login", {
+        email,
+        password,
+      });
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("email", res.data.email);
+      setUser(res.data);
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        // Convert Axios error to a standard Error your catch block expects
+        throw new Error(err.response?.data?.message || "Login failed.");
+      }
+      throw err;
+    }
   };
 
   const register = async (

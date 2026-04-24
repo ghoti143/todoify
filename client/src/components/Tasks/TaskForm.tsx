@@ -1,7 +1,14 @@
 import { useState } from "react";
+import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { taskApi } from "../../api/tasks";
 import type { Task, Priority } from "../../types";
+import {
+  createFieldChangeHandler,
+  getFieldError,
+  getFieldErrorsFromAxiosError,
+  type ValidationErrorResponse,
+} from "../../utils/formErrors";
 
 interface TaskFormProps {
   task?: Task;
@@ -27,6 +34,8 @@ export const TaskForm = ({ task, onDone }: TaskFormProps) => {
   const [dueDate, setDueDate] = useState(task?.dueDate ?? "");
   const [error, setError] = useState<string | null>(null);
 
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+
   const mutation = useMutation({
     mutationFn: () =>
       isEdit && task
@@ -45,15 +54,51 @@ export const TaskForm = ({ task, onDone }: TaskFormProps) => {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["tasks"] });
       onDone();
+      setFieldErrors({}); // Clear field errors on success
     },
     onError: (err: unknown) => {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Something went wrong. Please try again.",
-      );
+      const fieldErrs = getFieldErrorsFromAxiosError(err);
+
+      if (fieldErrs) {
+        setFieldErrors(fieldErrs);
+        setError("Please fix the errors below.");
+        return;
+      }
+
+      // Fallback to generic error
+      if (axios.isAxiosError(err)) {
+        setError(
+          (err.response?.data as ValidationErrorResponse)?.title || err.message,
+        );
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Something went wrong.");
+      }
+      setFieldErrors({});
     },
   });
+
+  const handleTitleChange = createFieldChangeHandler<string>(
+    "title",
+    setTitle,
+    setFieldErrors,
+  );
+  const handleDescriptionChange = createFieldChangeHandler<string>(
+    "description",
+    setDescription,
+    setFieldErrors,
+  );
+  const handlePriorityChange = createFieldChangeHandler<Priority>(
+    "priority",
+    setPriority,
+    setFieldErrors,
+  );
+  const handleDueDateChange = createFieldChangeHandler<string>(
+    "dueDate",
+    setDueDate,
+    setFieldErrors,
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,23 +133,33 @@ export const TaskForm = ({ task, onDone }: TaskFormProps) => {
           <input
             type="text"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => handleTitleChange(e.target.value)}
             placeholder="What needs doing?"
             required
             autoFocus
-            className={inputClass}
+            className={`${inputClass} ${getFieldError(fieldErrors, "title") ? "border-red-500 focus:border-red-400" : ""}`}
           />
+          {getFieldError(fieldErrors, "title") && (
+            <span className="text-red-400 text-[10px] mt-0.5">
+              {getFieldError(fieldErrors, "title")}
+            </span>
+          )}
         </label>
 
         <label className={labelClass}>
           <span className={labelTextClass}>Description</span>
           <textarea
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => handleDescriptionChange(e.target.value)}
             placeholder="Optional details…"
             rows={3}
-            className={`${inputClass} resize-none`}
+            className={`${inputClass} resize-none ${getFieldError(fieldErrors, "description") ? "border-red-500 focus:border-red-400" : ""}`}
           />
+          {getFieldError(fieldErrors, "description") && (
+            <span className="text-red-400 text-[10px] mt-0.5">
+              {getFieldError(fieldErrors, "description")}
+            </span>
+          )}
         </label>
 
         <div className="grid grid-cols-2 gap-3">
@@ -112,8 +167,8 @@ export const TaskForm = ({ task, onDone }: TaskFormProps) => {
             <span className={labelTextClass}>Priority</span>
             <select
               value={priority}
-              onChange={(e) => setPriority(e.target.value as Priority)}
-              className={inputClass}
+              onChange={(e) => handlePriorityChange(e.target.value as Priority)}
+              className={`${inputClass} ${getFieldError(fieldErrors, "priority") ? "border-red-500 focus:border-red-400" : ""}`}
             >
               {PRIORITIES.map((p) => (
                 <option key={p} value={p}>
@@ -121,6 +176,11 @@ export const TaskForm = ({ task, onDone }: TaskFormProps) => {
                 </option>
               ))}
             </select>
+            {getFieldError(fieldErrors, "priority") && (
+              <span className="text-red-400 text-[10px] mt-0.5">
+                {getFieldError(fieldErrors, "priority")}
+              </span>
+            )}
           </label>
 
           <label className={labelClass}>
@@ -128,9 +188,14 @@ export const TaskForm = ({ task, onDone }: TaskFormProps) => {
             <input
               type="date"
               value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-              className={inputClass}
+              onChange={(e) => handleDueDateChange(e.target.value)}
+              className={`${inputClass} ${getFieldError(fieldErrors, "dueDate") ? "border-red-500 focus:border-red-400" : ""}`}
             />
+            {getFieldError(fieldErrors, "dueDate") && (
+              <span className="text-red-400 text-[10px] mt-0.5">
+                {getFieldError(fieldErrors, "dueDate")}
+              </span>
+            )}
           </label>
         </div>
 

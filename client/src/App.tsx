@@ -16,7 +16,7 @@ const AppShell = () => {
       <div className="min-h-screen bg-[#080a0f] text-slate-100">
         <header className="border-b border-slate-800 px-6 py-3 flex items-center justify-between">
           <span className="text-amber-400 font-mono text-sm tracking-widest uppercase">
-            ◈ Tasks
+            ◈ Todoify
           </span>
           <div className="flex items-center gap-3">
             <span className="text-slate-500 font-mono text-xs">
