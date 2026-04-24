@@ -31,7 +31,7 @@ A full-stack task manager — .NET Web API backend, React frontend. Register, cr
 
 ## Running locally
 
-### Prerequisites
+#### Prerequisites
 - `npm >= 10.8.2`
 - `node >= 20.19.6`
 - `dotnet/sdk >= 10.0.202`
