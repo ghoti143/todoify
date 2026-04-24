@@ -50,8 +50,8 @@
 
 ## Quick Start
 
-
-`npm run docker:up`
+`git clone https://github.com/ghoti143/todoify.git`
+`cd todoify && npm run docker:up`
 navigate to http://localhost:8080
 login with demo@mytodoifyapp.com / demomytodoifyapp123
 
