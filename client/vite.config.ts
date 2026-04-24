@@ -7,9 +7,11 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react(), tailwindcss()],
     server: {
-      port: 5173,
+      host: "0.0.0.0",
+      port: 8080,
+      open: true,
       proxy: {
-        "/api": env.API_URL || "http://localhost:5231",
+        "/api": env.API_URL || "http://localhost:8081",
       },
     },
     test: {

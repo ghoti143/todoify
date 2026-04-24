@@ -1,0 +1,26 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8081
+    # Mount user-secrets or .env here if needed:
+    # env_file:
+    #   - ./server/.env
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      target: dev
+    ports:
+      - "8080:8080"
+    environment:
+      # Points the Vite proxy at the api service via Docker's internal DNS
+      - API_URL=http://api:8081
+    depends_on:
+      - api

@@ -37,3 +37,34 @@
 ## Trade-offs
 - Chose in-memory EF over SQLite for simplicity — SQLite would be a one-line change in DI config
 - No tests in this submission due to time, but architecture is designed to be testable (DI, interfaces, no static state)
+
+
+
+
+--------
+
+
+
+
+
+
+## Quick Start
+
+
+`npm run docker:up`
+navigate to http://localhost:8080
+login with demo@mytodoifyapp.com / demomytodoifyapp123
+
+
+
+## run locally
+
+### prerequisites
+
+npm >= 10.8.2
+node >= 20.19.6
+dotnet/sdk >= 10.0.202
+
+`npm run dev` - this will fire up both the client and the server
+
+

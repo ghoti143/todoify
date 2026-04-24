@@ -17,8 +17,8 @@ namespace Todoify.Api.Data
             UserManager<AppUser> userManager = services.GetRequiredService<UserManager<AppUser>>();
             AppDbContext db = services.GetRequiredService<AppDbContext>();
 
-            const string seedEmail = "demo@example.com";
-            const string seedPassword = "demo123";
+            const string seedEmail = "demo@mytodoifyapp.com";
+            const string seedPassword = "demomytodoifyapp123";
 
             if (await userManager.FindByEmailAsync(seedEmail) is not null)
             {

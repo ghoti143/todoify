@@ -84,7 +84,7 @@ builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddCors(o => o.AddPolicy("Frontend", p =>
-    p.WithOrigins("http://localhost:3000", "http://localhost:5173")
+    p.WithOrigins("http://localhost:3000", "http://localhost:8080")
      .AllowAnyMethod()
      .AllowAnyHeader()));
 
