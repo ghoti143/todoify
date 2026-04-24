@@ -80,7 +80,7 @@ A full-stack task manager — .NET Web API backend, React frontend. Register, cr
 ### DX
 - Docker for single-command local spin-up
 - Root npm scripts for install, dev, lint, and test
-- `.editorconfig` for consistent linting
+- `.editorconfig` for consistent C# formatting
 
 ---
 
