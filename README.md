@@ -43,12 +43,19 @@ A full-stack task manager — .NET Web API backend, React frontend. Register, cr
    npm run setup
    ```
 
+3. **Kick the tires**
+   ```bash
+   npm run test
+   ```
+
 3. **Start client and server together**
    ```bash
    npm run dev
    ```
 
-4. **App:** http://localhost:8080 · **Swagger:** http://localhost:8081/swagger
+4. **Open App:** http://localhost:8080 · **Open Swagger:** http://localhost:8081/swagger
+ 
+5. **Log in with the demo account**
    ```
    demo@mytodoifyapp.com / demomytodoifyapp123
    ```
@@ -92,3 +99,4 @@ A full-stack task manager — .NET Web API backend, React frontend. Register, cr
 - GitHub Actions to run tests on pull request builds
 - GitHub Actions for automatic deploy on merge to main
 - Generate TypeScript types from C# DTOs
+- Add Storybook to view component variations
