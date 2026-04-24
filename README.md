@@ -64,6 +64,12 @@ A full-stack task manager — .NET Web API backend, React frontend. Register, cr
 
 ## Features
 
+### Client
+- TailwindCSS for clean, utility-first styling
+- React Query for loading and error state management
+- `AuthProvider` stores JWT in local storage
+- Axios interceptors attach JWT to request headers
+
 ### Server
 - DTOs with fluent validation + unit tests
 - OAuth2 authentication via Microsoft.IdentityModel
@@ -75,26 +81,20 @@ A full-stack task manager — .NET Web API backend, React frontend. Register, cr
 - Root npm scripts for install, dev, lint, and test
 - `.editorconfig` for consistent linting
 
-### Client
-- TailwindCSS for clean, utility-first styling
-- React Query for loading and error state management
-- `AuthProvider` stores JWT in local storage
-- Axios interceptors attach JWT to request headers
-
 ---
 
 ## Future improvements
-
-### Server
-- Multi-tenancy — allow users in the same org to share tasks
-- Move JWT signing key out of repo and into Azure Key Vault
-- Add refresh tokens
 
 ### Client
 - Client-side form validation to avoid unnecessary round trips
 - URL-based routing for easy state sharing via copy/paste
 - Migrate JWT storage from local storage to `httpOnly` cookie
 - Keyboard shortcuts to create new task, mark task complete, etc.
+
+### Server
+- Multi-tenancy — allow users in the same org to share tasks
+- Move JWT signing key out of repo and into Azure Key Vault
+- Add refresh tokens
 
 ### DX
 - GitHub Actions to run tests on pull request builds
